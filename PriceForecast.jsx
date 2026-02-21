@@ -1,83 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Design tokens                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const BRAND = {
-  bg:            "#0f1525",
-  cardBg:        "#171e32",
-  cardBgHover:   "#1c2440",
-  cardBorder:    "rgba(255,255,255,0.06)",
-  accent:        "#4b7bff",
-  greenBright:   "#22c55e",
-  green:         "#34d399",
-  yellow:        "#fbbf24",
-  orange:        "#f97316",
-  red:           "#ef4444",
-  textPrimary:   "#f0f2f8",
-  textSecondary: "rgba(255,255,255,0.50)",
-  textMuted:     "rgba(255,255,255,0.28)",
-  fontMono:      "'JetBrains Mono', monospace",
-  fontSans:      "'Inter', -apple-system, sans-serif",
-};
-
-const getScoreColor = (s) => {
-  if (s >= 80) return BRAND.greenBright;
-  if (s >= 60) return BRAND.green;
-  if (s >= 40) return BRAND.yellow;
-  if (s >= 20) return BRAND.orange;
-  return BRAND.red;
-};
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Keyframes                                                                  ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const KEYFRAMES = `
-  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
-
-  @keyframes lineDrawIn {
-    from { stroke-dashoffset: var(--pathlen, 4000); }
-    to   { stroke-dashoffset: 0; }
-  }
-  @keyframes areaFadeIn {
-    from { opacity: 0; }
-    to   { opacity: 1; }
-  }
-  @keyframes coneFadeIn {
-    from { opacity: 0; clip-path: inset(0 100% 0 0); }
-    to   { opacity: 1; clip-path: inset(0 0% 0 0); }
-  }
-  @keyframes dotPop {
-    0%   { transform: scale(0); opacity: 0; }
-    70%  { transform: scale(1.4); opacity: 1; }
-    100% { transform: scale(1); opacity: 1; }
-  }
-  @keyframes stripIn {
-    from { opacity: 0; transform: translateY(4px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes dotRowIn {
-    from { opacity: 0; transform: scaleX(0.75); }
-    to   { opacity: 1; transform: scaleX(1); }
-  }
-  @keyframes popoverIn {
-    from { opacity: 0; transform: translateY(4px) scale(0.97); }
-    to   { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @keyframes pinnedFade {
-    0%   { opacity: 1; }
-    60%  { opacity: 1; }
-    100% { opacity: 0; }
-  }
-  @keyframes skeletonPulse {
-    0%, 100% { opacity: 0.35; }
-    50%       { opacity: 0.65; }
-  }
-  .fan-period-btn:active { transform: scale(0.92); }
-  .fan-meth-btn:hover { opacity: 1 !important; }
-`;
+import { BRAND, getScoreColor, hexToRgb, cardStyle } from "./design-tokens.js";
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Data                                                                       ║
@@ -139,7 +61,6 @@ const HIST_FRAC = 0.58;
 const f1       = (n) => n.toFixed(1);
 const lerp     = (a, b, t) => a + (b - a) * t;
 const priceY   = (p, lo, hi) => PAD.t + CH - ((p - lo) / (hi - lo)) * CH;
-const hexToRgb = (hex) => { const n = parseInt(hex.slice(1), 16); return `${(n >> 16) & 255},${(n >> 8) & 255},${n & 255}`; };
 const fmtUSD   = (n) => `$${n.toFixed(2)}`;
 const fmtPct   = (n) => `${n > 0 ? "+" : ""}${n.toFixed(1)}%`;
 
@@ -1218,7 +1139,7 @@ function FanChartSVG({ histPrices, company, animKey, onTip, pinned, onPin }) {
 // ║  Root component                                                             ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-export default function PriceFanChart() {
+export default function PriceForecast() {
   const company    = MOCK_COMPANY;
   const [period,   setPeriod]   = useState("5Y");
   const [animKey,  setAnimKey]  = useState(0);
@@ -1241,10 +1162,7 @@ export default function PriceFanChart() {
 
 
   return (
-    <div style={{ background: BRAND.bg, minHeight: "100vh", display: "flex", alignItems: "center", justifyContent: "center", fontFamily: BRAND.fontSans, padding: 20 }}>
-      <style>{KEYFRAMES}</style>
-
-      <div style={{ width: "100%", maxWidth: 590, background: BRAND.cardBg, border: `1px solid ${BRAND.cardBorder}`, borderRadius: 16, overflow: "visible" }}>
+    <div style={{ ...cardStyle, overflow: "visible" }}>
         <div style={{ padding: "20px 24px 16px" }}>
 
           {/* ── Header ── */}
@@ -1378,6 +1296,5 @@ export default function PriceFanChart() {
 
         </div>
       </div>
-    </div>
   );
 }

@@ -1,84 +1,19 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from "react";
+import {
+  BRAND,
+  PILLAR_KEYS,
+  PILLAR_COLORS,
+  PILLAR_LABELS,
+  getScoreColor,
+  SCORE_BANDS,
+  cardStyle,
+  SkeletonPulse,
+} from "./design-tokens.js";
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  SECTION: constants/brand.js                                                ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const BRAND = {
-  bg: "#0f1525",
-  cardBg: "#171e32",
-  cardBorder: "rgba(255,255,255,0.06)",
-  accent: "#4b7bff",
-  green: "#34d399",
-  greenBright: "#22c55e",
-  yellow: "#fbbf24",
-  orange: "#f97316",
-  red: "#ef4444",
-  textPrimary: "#f0f2f8",
-  textSecondary: "rgba(255,255,255,0.5)",
-  textMuted: "rgba(255,255,255,0.28)",
-  fontMono: "'JetBrains Mono', monospace",
-  fontSans: "'Inter', -apple-system, sans-serif",
-};
-
-const PILLAR_KEYS = ["value", "growth", "profitability", "health", "payout"];
-
-// Accessible contrast: boosted for WCAG AA against #171e32
-const PILLAR_COLORS = {
-  value: "#a5b4fc",       // indigo-300
-  growth: "#34d399",      // emerald-400
-  profitability: "#fcd34d", // amber-300
-  health: "#38bdf8",      // sky-400
-  payout: "#f9a8d4",      // pink-300
-};
-
-const PILLAR_LABELS = {
-  value: "Value",
-  growth: "Growth",
-  profitability: "Profitability",
-  health: "Health",
-  payout: "Payout",
-};
-
-const getScoreColor = (score) => {
-  if (score >= 80) return BRAND.greenBright;
-  if (score >= 60) return BRAND.green;
-  if (score >= 40) return BRAND.yellow;
-  if (score >= 20) return BRAND.orange;
-  return BRAND.red;
-};
-
-// Score band definitions for background shading
-const SCORE_BANDS = [
-  { min: 80, max: 100, color: BRAND.greenBright },
-  { min: 60, max: 80, color: BRAND.green },
-  { min: 40, max: 60, color: BRAND.yellow },
-  { min: 20, max: 40, color: BRAND.orange },
-  { min: 0, max: 20, color: BRAND.red },
-];
-
-const GLOBAL_KEYFRAMES = `
-  @keyframes shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  @keyframes evolFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to   { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes skeletonLine {
-    0%   { stroke-dashoffset: 800; }
-    100% { stroke-dashoffset: 0; }
-  }
-  @keyframes spin {
-    to { transform: rotate(360deg); }
-  }
-`;
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Mock historical data                                                       ║
-// ║  API: GET /api/companies/:ticker/monkscore/history?range=5y                 ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   Mock historical data
+//   API: GET /api/companies/:ticker/monkscore/history?range=5y
+// ======================================================================
 
 const MOCK_HISTORY = {
   AAPL: [
@@ -149,9 +84,9 @@ const MOCK_HISTORY = {
   ],
 };
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Chart math utilities                                                       ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   Chart math utilities
+// ======================================================================
 
 const CHART_PADDING = { top: 20, right: 24, bottom: 28, left: 32 };
 
@@ -206,21 +141,9 @@ function formatDateFull(dateStr) {
   return `${months[d.getMonth()]} ${d.getDate()}, ${d.getFullYear()}`;
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Loading states                                                             ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-function SkeletonPulse({ width, height, borderRadius = 4, style = {} }) {
-  return (
-    <div style={{
-      width, height, borderRadius,
-      background: "linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)",
-      backgroundSize: "200% 100%",
-      animation: "shimmer 1.5s ease infinite",
-      ...style,
-    }} />
-  );
-}
+// ======================================================================
+//   Loading states
+// ======================================================================
 
 // Tier 1: Full skeleton (1.2s initial load)
 function EvolutionSkeleton() {
@@ -298,9 +221,9 @@ function RangeLoadingOverlay() {
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Empty state                                                                ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   Empty state
+// ======================================================================
 
 function EmptyState() {
   return (
@@ -321,9 +244,9 @@ function EmptyState() {
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  useTimeRange hook                                                          ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   useTimeRange hook
+// ======================================================================
 
 function useTimeRange(fullData) {
   const [range, setRange] = useState("MAX");
@@ -341,7 +264,7 @@ function useTimeRange(fullData) {
   const changeRange = useCallback((newRange) => {
     if (newRange === range) return;
     setRangeLoading(true);
-    // Simulate API delay — replace with real fetch
+    // Simulate API delay -- replace with real fetch
     setTimeout(() => {
       setRange(newRange);
       setRangeLoading(false);
@@ -351,9 +274,9 @@ function useTimeRange(fullData) {
   return { range, setRange: changeRange, data: filteredData, rangeLoading };
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  useChartInteraction hook (mouse + touch)                                   ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   useChartInteraction hook (mouse + touch)
+// ======================================================================
 
 function useChartInteraction(chartAreaRef, dataLength) {
   const [hoverIdx, setHoverIdx] = useState(null);
@@ -427,9 +350,9 @@ function useChartInteraction(chartAreaRef, dataLength) {
   };
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  EvolutionChart SVG                                                         ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   EvolutionChart SVG
+// ======================================================================
 
 function EvolutionChart({ data, activePillar, hoverIdx, animProgress }) {
   const svgW = 520;
@@ -551,7 +474,7 @@ function EvolutionChart({ data, activePillar, hoverIdx, animProgress }) {
               const lp = pillarPoints[activePillar][n - 1];
               return <text x={lp.x + 8} y={lp.y + 3.5} fill={d > 0 ? BRAND.greenBright : BRAND.red}
                 fontSize="9" fontWeight="600" fontFamily={BRAND.fontMono} textAnchor="start"
-              >{d > 0 ? "▲" : "▼"}{Math.abs(d)}pts</text>;
+              >{d > 0 ? "\u25B2" : "\u25BC"}{Math.abs(d)}pts</text>;
             })()}
           </>
         ) : (
@@ -572,7 +495,7 @@ function EvolutionChart({ data, activePillar, hoverIdx, animProgress }) {
               const lp = mainPoints[n - 1];
               return <text x={lp.x + 8} y={lp.y + 3.5} fill={d > 0 ? BRAND.greenBright : BRAND.red}
                 fontSize="9" fontWeight="600" fontFamily={BRAND.fontMono} textAnchor="start"
-              >{d > 0 ? "▲" : "▼"}{Math.abs(d)}pts</text>;
+              >{d > 0 ? "\u25B2" : "\u25BC"}{Math.abs(d)}pts</text>;
             })()}
           </>
         )}
@@ -606,9 +529,9 @@ function EvolutionChart({ data, activePillar, hoverIdx, animProgress }) {
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Event badge (floats above chart on event markers)                          ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   Event badge (floats above chart on event markers)
+// ======================================================================
 
 function EventBadge({ event, dataIdx, dataLength }) {
   if (!event) return null;
@@ -626,14 +549,14 @@ function EventBadge({ event, dataIdx, dataLength }) {
       animation: "evolFadeIn 0.15s ease",
       pointerEvents: "none", zIndex: 18,
     }}>
-      ◆ {event}
+      {"\u25C6"} {event}
     </div>
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  PillarRibbons                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   PillarRibbons
+// ======================================================================
 
 function PillarRibbons({ data, activePillar, setActivePillar, hoverIdx }) {
   const snap = data[hoverIdx !== null ? hoverIdx : data.length - 1];
@@ -647,7 +570,7 @@ function PillarRibbons({ data, activePillar, setActivePillar, hoverIdx }) {
         fontFamily: BRAND.fontMono, opacity: 0.6, textAlign: "center",
       }}>
         {activePillar
-          ? `Showing ${PILLAR_LABELS[activePillar]} · click to reset`
+          ? `Showing ${PILLAR_LABELS[activePillar]} \u00B7 click to reset`
           : "Click a pillar to isolate it on the chart"}
       </div>
       <div style={{ display: "flex", gap: 3 }}>
@@ -701,9 +624,9 @@ function PillarRibbons({ data, activePillar, setActivePillar, hoverIdx }) {
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  CrosshairTooltip                                                           ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   CrosshairTooltip
+// ======================================================================
 
 function CrosshairTooltip({ data, hoverIdx, activePillar }) {
   if (hoverIdx === null || !data[hoverIdx]) return null;
@@ -758,7 +681,7 @@ function CrosshairTooltip({ data, hoverIdx, activePillar }) {
             fontSize: 9, fontWeight: 600, fontFamily: BRAND.fontMono,
             color: displayDelta > 0 ? BRAND.greenBright : BRAND.red,
           }}>
-            {displayDelta > 0 ? "▲" : "▼"} {Math.abs(displayDelta)}
+            {displayDelta > 0 ? "\u25B2" : "\u25BC"} {Math.abs(displayDelta)}
           </span>
         )}
       </div>
@@ -793,16 +716,16 @@ function CrosshairTooltip({ data, hoverIdx, activePillar }) {
           marginTop: 6, paddingTop: 6, borderTop: `1px solid ${BRAND.cardBorder}`,
           fontSize: 8.5, color: BRAND.accent, fontStyle: "italic",
         }}>
-          ◆ {snap.event}
+          {"\u25C6"} {snap.event}
         </div>
       )}
     </div>
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Small components                                                           ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   Small components
+// ======================================================================
 
 function RangeToggle({ range, setRange, disabled }) {
   const ranges = ["3Y", "5Y", "MAX"];
@@ -848,9 +771,9 @@ function ExportButton({ onClick }) {
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Main component                                                             ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
+// ======================================================================
+//   Main component
+// ======================================================================
 
 export default function MonkScoreEvolution() {
   const ticker = "NVDA";
@@ -903,72 +826,59 @@ export default function MonkScoreEvolution() {
   const hoveredEvent = hoverIdx !== null ? data[hoverIdx]?.event : null;
 
   return (
-    <div style={{
-      background: BRAND.bg, minHeight: "100vh",
-      display: "flex", alignItems: "center", justifyContent: "center",
-      fontFamily: BRAND.fontSans, padding: 20,
-    }} onClick={dismissPinned}>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      <style>{GLOBAL_KEYFRAMES}</style>
-
-      <div ref={cardRef} onClick={(e) => e.stopPropagation()} style={{
-        position: "relative", width: "100%", maxWidth: 520,
-        background: BRAND.cardBg, border: `1px solid ${BRAND.cardBorder}`,
-        borderRadius: 16, overflow: "hidden",
-      }}>
-        {loading ? <EvolutionSkeleton /> : fullData.length < 2 ? <EmptyState /> : (
-          <div style={{ padding: "20px 24px 20px" }}>
-            {/* Header */}
-            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
-              <span style={{
-                color: BRAND.textMuted, fontSize: 11, fontWeight: 600,
-                letterSpacing: "0.08em", textTransform: "uppercase",
-              }}>MonkScore™ Evolution</span>
-              <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-                <RangeToggle range={range} setRange={setRange} disabled={rangeLoading} />
-                <ExportButton onClick={exportPNG} />
-              </div>
-            </div>
-
-            {/* Chart area */}
-            <div ref={chartAreaRef} {...chartHandlers}
-              style={{
-                position: "relative",
-                cursor: pinned ? "pointer" : "crosshair",
-                margin: "0 -24px", touchAction: "none",
-              }}
-            >
-              {rangeLoading && <RangeLoadingOverlay />}
-
-              <EvolutionChart data={data} activePillar={activePillar}
-                hoverIdx={hoverIdx} animProgress={animProgress} />
-
-              {hoveredEvent && (
-                <EventBadge event={hoveredEvent} dataIdx={hoverIdx} dataLength={data.length} />
-              )}
-
-              <CrosshairTooltip data={data} hoverIdx={hoverIdx} activePillar={activePillar} />
-            </div>
-
-            {/* Pillar ribbons */}
-            <PillarRibbons data={data} activePillar={activePillar}
-              setActivePillar={setActivePillar} hoverIdx={hoverIdx} />
-
-            {/* Footer */}
-            <div style={{
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-              marginTop: 10, padding: "0 2px",
-            }}>
-              <span style={{ color: BRAND.textMuted, fontSize: 9, opacity: 0.6 }}>
-                Latest: {formatDateFull(fullData[fullData.length - 1].date)}
-              </span>
-              <span style={{ color: BRAND.textMuted, fontSize: 9, fontFamily: BRAND.fontSans, opacity: 0.6 }}>
-                MonkStreet · www.monk.st
-              </span>
+    <div ref={cardRef} onClick={dismissPinned} style={{ ...cardStyle, position: "relative" }}>
+      {loading ? <EvolutionSkeleton /> : fullData.length < 2 ? <EmptyState /> : (
+        <div onClick={(e) => e.stopPropagation()} style={{ padding: "20px 24px 20px" }}>
+          {/* Header */}
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 12 }}>
+            <span style={{
+              color: BRAND.textMuted, fontSize: 11, fontWeight: 600,
+              letterSpacing: "0.08em", textTransform: "uppercase",
+            }}>MonkScore{"\u2122"} Evolution</span>
+            <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+              <RangeToggle range={range} setRange={setRange} disabled={rangeLoading} />
+              <ExportButton onClick={exportPNG} />
             </div>
           </div>
-        )}
-      </div>
+
+          {/* Chart area */}
+          <div ref={chartAreaRef} {...chartHandlers}
+            style={{
+              position: "relative",
+              cursor: pinned ? "pointer" : "crosshair",
+              margin: "0 -24px", touchAction: "none",
+            }}
+          >
+            {rangeLoading && <RangeLoadingOverlay />}
+
+            <EvolutionChart data={data} activePillar={activePillar}
+              hoverIdx={hoverIdx} animProgress={animProgress} />
+
+            {hoveredEvent && (
+              <EventBadge event={hoveredEvent} dataIdx={hoverIdx} dataLength={data.length} />
+            )}
+
+            <CrosshairTooltip data={data} hoverIdx={hoverIdx} activePillar={activePillar} />
+          </div>
+
+          {/* Pillar ribbons */}
+          <PillarRibbons data={data} activePillar={activePillar}
+            setActivePillar={setActivePillar} hoverIdx={hoverIdx} />
+
+          {/* Footer */}
+          <div style={{
+            display: "flex", justifyContent: "space-between", alignItems: "center",
+            marginTop: 10, padding: "0 2px",
+          }}>
+            <span style={{ color: BRAND.textMuted, fontSize: 9, opacity: 0.6 }}>
+              Latest: {formatDateFull(fullData[fullData.length - 1].date)}
+            </span>
+            <span style={{ color: BRAND.textMuted, fontSize: 9, fontFamily: BRAND.fontSans, opacity: 0.6 }}>
+              MonkStreet {"\u00B7"} www.monk.st
+            </span>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
