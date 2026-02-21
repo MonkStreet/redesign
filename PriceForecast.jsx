@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useMemo, useCallback } from "react";
-import { BRAND, getScoreColor, hexToRgb, cardStyle } from "./design-tokens.js";
+import { BRAND, getScoreColor, hexToRgb, cardStyle } from "./design-tokens.jsx";
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Data                                                                       ║

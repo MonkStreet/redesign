@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-import { BRAND, PILLAR_KEYS, PILLAR_COLORS, getScoreColor, cardStyle, SkeletonPulse } from "./design-tokens.js";
+import { BRAND, PILLAR_KEYS, PILLAR_COLORS, getScoreColor, cardStyle, SkeletonPulse } from "./design-tokens.jsx";
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Mini snowflake (visual cue connecting pillar to radar chart)                ║

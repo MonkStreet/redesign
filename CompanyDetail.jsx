@@ -12,7 +12,7 @@
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
 import { useState } from "react";
-import { BRAND, GLOBAL_KEYFRAMES } from "./design-tokens.js";
+import { BRAND, GLOBAL_KEYFRAMES } from "./design-tokens.jsx";
 import MonkScoreRadar from "./MonkScoreRadar.jsx";
 import PillarBreakdown from "./PillarBreakdown.jsx";
 import MonkScoreEvolution from "./MonkScoreEvolution.jsx";

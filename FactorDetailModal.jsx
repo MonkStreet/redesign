@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-import { BRAND, PILLAR_COLORS, getScoreColor, SkeletonPulse } from "./design-tokens.js";
+import { BRAND, PILLAR_COLORS, getScoreColor, SkeletonPulse } from "./design-tokens.jsx";
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Mock data                                                                  ║

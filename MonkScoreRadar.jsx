@@ -1,7 +1,7 @@
 import { useState, useEffect, useRef, useCallback } from "react";
 import {
   BRAND, PILLAR_KEYS, PILLAR_COLORS, getScoreColor, cardStyle, SkeletonPulse,
-} from "./design-tokens.js";
+} from "./design-tokens.jsx";
 
 // ── Smooth curves ──────────────────────────────────────────────────────────────
 

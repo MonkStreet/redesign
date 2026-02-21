@@ -8,7 +8,7 @@ import {
   SCORE_BANDS,
   cardStyle,
   SkeletonPulse,
-} from "./design-tokens.js";
+} from "./design-tokens.jsx";
 
 // ======================================================================
 //   Mock historical data
