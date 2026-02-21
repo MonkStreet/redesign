@@ -1,42 +1,5 @@
 import { useState, useRef, useEffect, useCallback, useMemo } from "react";
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Design tokens (shared with pillar-cards.jsx)                               ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const BRAND = {
-  bg: "#0f1525",
-  cardBg: "#171e32",
-  cardBgHover: "#1c2440",
-  cardBorder: "rgba(255,255,255,0.06)",
-  greenBright: "#22c55e",
-  green: "#34d399",
-  yellow: "#fbbf24",
-  orange: "#f97316",
-  red: "#ef4444",
-  accent: "#4b7bff",
-  textPrimary: "#f0f2f8",
-  textSecondary: "rgba(255,255,255,0.55)",
-  textMuted: "rgba(255,255,255,0.28)",
-  fontMono: "'JetBrains Mono', monospace",
-  fontSans: "'Inter', -apple-system, sans-serif",
-};
-
-const PILLAR_COLORS = {
-  value: "#a5b4fc",
-  growth: "#34d399",
-  profitability: "#fcd34d",
-  health: "#38bdf8",
-  payout: "#f9a8d4",
-};
-
-const getScoreColor = (s) => {
-  if (s >= 80) return BRAND.greenBright;
-  if (s >= 60) return BRAND.green;
-  if (s >= 40) return BRAND.yellow;
-  if (s >= 20) return BRAND.orange;
-  return BRAND.red;
-};
+import { BRAND, PILLAR_COLORS, getScoreColor, SkeletonPulse } from "./design-tokens.js";
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Mock data                                                                  ║
@@ -55,7 +18,7 @@ const MOCK_FACTOR = {
   avg3Y: 25.0,
   definition: "The percentage of revenue that becomes profit after all expenses. Higher means the company keeps more of every dollar it earns.",
   formula: {
-    label: "Net Income ÷ Revenue",
+    label: "Net Income \u00f7 Revenue",
     numerator: { label: "Net Income", value: "$96.2B" },
     denominator: { label: "Revenue", value: "$380.1B" },
     result: "25.3%",
@@ -151,17 +114,6 @@ function SectionLabel({ children }) {
 // ║  Loading skeleton                                                           ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-function SkeletonPulse({ width, height, radius = 4, style = {} }) {
-  return (
-    <div style={{
-      width, height, borderRadius: radius,
-      background: "rgba(255,255,255,0.04)",
-      animation: "skeletonPulse 1.5s ease-in-out infinite",
-      ...style,
-    }} />
-  );
-}
-
 function ModalSkeleton() {
   return (
     <div style={{ padding: 20, overflow: "hidden" }}>
@@ -174,7 +126,7 @@ function ModalSkeleton() {
         <SkeletonPulse width={70} height={28} />
         <SkeletonPulse width={120} height={14} style={{ marginTop: 8 }} />
       </div>
-      <SkeletonPulse width="100%" height={140} radius={8} style={{ marginBottom: 24 }} />
+      <SkeletonPulse width="100%" height={140} borderRadius={8} style={{ marginBottom: 24 }} />
       {[1,2,3,4,5].map(i => (
         <div key={i} style={{ display: "flex", gap: 8, marginBottom: 8 }}>
           <SkeletonPulse width={38} height={14} />
@@ -182,7 +134,7 @@ function ModalSkeleton() {
           <SkeletonPulse width={40} height={14} />
         </div>
       ))}
-      <SkeletonPulse width="100%" height={44} radius={8} style={{ marginTop: 20 }} />
+      <SkeletonPulse width="100%" height={44} borderRadius={8} style={{ marginTop: 20 }} />
     </div>
   );
 }
@@ -496,7 +448,7 @@ function PeerBars({ peers, sectorMedian, color, unit = "%" }) {
 // ║  Modal                                                                      ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-function FactorDetailModal({ data, onClose, loading = false }) {
+export default function FactorDetailModal({ data, onClose, loading = false }) {
   const overlayRef = useRef(null);
   const panelRef = useRef(null);
   const dragRef = useRef({ startY: 0, currentY: 0, dragging: false });
@@ -625,9 +577,9 @@ function FactorDetailModal({ data, onClose, loading = false }) {
                     `Sector median: ${data.sectorMedian}%`,
                     "",
                     "Peers:",
-                    ...data.peers.map(p => `  ${p.ticker}: ${p.value}%${p.isCompany ? " ←" : ""}`),
+                    ...data.peers.map(p => `  ${p.ticker}: ${p.value}%${p.isCompany ? " \u2190" : ""}`),
                     "",
-                    `${data.companyName} (${data.company}) · ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} · MonkStreet · www.monk.st`,
+                    `${data.companyName} (${data.company}) \u00b7 ${new Date().toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })} \u00b7 MonkStreet \u00b7 www.monk.st`,
                   ].filter(Boolean).join("\n");
                   navigator.clipboard.writeText(text);
                   setCopied(true);
@@ -816,127 +768,4 @@ function FactorDetailModal({ data, onClose, loading = false }) {
   );
 }
 
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Keyframes                                                                  ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const KEYFRAMES = `
-  @keyframes modalFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes modalSlideUp {
-    from { opacity: 0; transform: translateY(16px) scale(0.98); }
-    to { opacity: 1; transform: translateY(0) scale(1); }
-  }
-  @keyframes sectionFadeIn {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  @keyframes lineDrawIn {
-    to { stroke-dashoffset: 0; }
-  }
-  @keyframes areaFadeIn {
-    from { opacity: 0; }
-    to { opacity: 1; }
-  }
-  @keyframes dotPopIn {
-    from { opacity: 0; transform-origin: center; transform: scale(0); }
-    to { opacity: 1; transform-origin: center; transform: scale(1); }
-  }
-  @keyframes tooltipFadeIn {
-    from { opacity: 0; transform: translate(-50%, -90%); }
-    to { opacity: 1; transform: translate(-50%, -100%); }
-  }
-  @keyframes skeletonPulse {
-    0%, 100% { opacity: 0.4; }
-    50% { opacity: 0.8; }
-  }
-  @media (max-width: 540px) {
-    .factor-modal-panel {
-      border-radius: 16px 16px 0 0 !important;
-      max-width: 100% !important;
-      align-self: flex-end !important;
-      max-height: 75vh !important;
-    }
-  }
-  .factor-modal-panel::-webkit-scrollbar {
-    display: none;
-  }
-  .modal-close-btn:active {
-    transform: scale(0.9);
-    opacity: 0.8;
-  }
-  @media (min-width: 541px) {
-    .modal-drag-handle { display: none !important; }
-  }
-  .period-btn:active {
-    transform: scale(0.92);
-    opacity: 0.8;
-  }
-`;
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Demo wrapper                                                               ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-export default function FactorDetailDemo() {
-  const [mode, setMode] = useState(null);
-
-  const handleOpen = () => {
-    setMode("loading");
-    setTimeout(() => setMode("loaded"), 1200);
-  };
-
-  return (
-    <div style={{
-      background: BRAND.bg, minHeight: "100vh",
-      fontFamily: BRAND.fontSans, padding: "40px 20px",
-      display: "flex", flexDirection: "column", alignItems: "center",
-      justifyContent: "center", gap: 16,
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      <style>{KEYFRAMES}</style>
-
-      <button onClick={handleOpen} style={{
-        background: BRAND.cardBg, border: `1px solid ${BRAND.cardBorder}`,
-        borderRadius: 10, padding: "14px 24px",
-        cursor: "pointer", color: BRAND.textPrimary,
-        fontFamily: BRAND.fontSans, fontSize: 13,
-        display: "flex", alignItems: "center", gap: 10,
-        transition: "all 0.15s ease",
-      }}
-        onMouseEnter={(e) => {
-          e.currentTarget.style.background = BRAND.cardBgHover;
-          e.currentTarget.style.transform = "translateY(-1px)";
-        }}
-        onMouseLeave={(e) => {
-          e.currentTarget.style.background = BRAND.cardBg;
-          e.currentTarget.style.transform = "translateY(0)";
-        }}
-      >
-        <div style={{ width: 4, height: 4, borderRadius: 2, background: BRAND.greenBright }} />
-        <span style={{ fontWeight: 600 }}>Net Margin</span>
-        <span style={{ fontFamily: BRAND.fontMono, color: BRAND.greenBright, fontWeight: 600 }}>25.3%</span>
-        <span style={{ fontSize: 10, fontWeight: 600, fontFamily: BRAND.fontMono, color: BRAND.greenBright }}>93</span>
-        <span style={{ fontSize: 9, color: BRAND.textMuted, fontFamily: BRAND.fontMono, marginLeft: 4 }}>← CLICK</span>
-      </button>
-
-      <p style={{
-        color: BRAND.textMuted, fontSize: 11, fontFamily: BRAND.fontMono,
-        textAlign: "center", maxWidth: 420, lineHeight: 1.6,
-      }}>
-        1.2s skeleton → sections stagger in → line draws → bars fill →
-        numbers count up → hover for tooltip with crosshair
-      </p>
-
-      {mode && (
-        <FactorDetailModal
-          data={mode === "loaded" ? MOCK_FACTOR : null}
-          loading={mode === "loading"}
-          onClose={() => setMode(null)}
-        />
-      )}
-    </div>
-  );
-}
+export { MOCK_FACTOR };

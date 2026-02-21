@@ -1,44 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from "react";
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Design tokens                                                              ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const BRAND = {
-  bg: "#0f1525",
-  cardBg: "#171e32",
-  cardBgHover: "#1c2440",
-  cardBorder: "rgba(255,255,255,0.06)",
-  greenBright: "#22c55e",
-  green: "#34d399",
-  yellow: "#fbbf24",
-  orange: "#f97316",
-  red: "#ef4444",
-  accent: "#4b7bff",
-  textPrimary: "#f0f2f8",
-  textSecondary: "rgba(255,255,255,0.55)",
-  textMuted: "rgba(255,255,255,0.28)",
-  fontMono: "'JetBrains Mono', monospace",
-  fontSans: "'Inter', -apple-system, sans-serif",
-};
-
-const PILLAR_COLORS = {
-  value: "#a5b4fc",
-  growth: "#34d399",
-  profitability: "#fcd34d",
-  health: "#38bdf8",
-  payout: "#f9a8d4",
-};
-
-const PILLAR_KEYS = ["value", "growth", "profitability", "health", "payout"];
-
-const getScoreColor = (s) => {
-  if (s >= 80) return BRAND.greenBright;
-  if (s >= 60) return BRAND.green;
-  if (s >= 40) return BRAND.yellow;
-  if (s >= 20) return BRAND.orange;
-  return BRAND.red;
-};
+import { BRAND, PILLAR_KEYS, PILLAR_COLORS, getScoreColor, cardStyle, SkeletonPulse } from "./design-tokens.js";
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Mini snowflake (visual cue connecting pillar to radar chart)                ║
@@ -523,17 +484,6 @@ function GroupHeader({ group }) {
 // ║  Loading skeleton                                                           ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-function SkeletonPulse({ width, height, borderRadius = 4, style = {} }) {
-  return (
-    <div style={{
-      width, height, borderRadius,
-      background: "linear-gradient(90deg, rgba(255,255,255,0.04) 25%, rgba(255,255,255,0.08) 50%, rgba(255,255,255,0.04) 75%)",
-      backgroundSize: "200% 100%", animation: "shimmer 1.5s ease infinite",
-      ...style,
-    }} />
-  );
-}
-
 function PillarSkeleton() {
   return (
     <div style={{ padding: "16px 14px" }}>
@@ -558,49 +508,10 @@ function PillarSkeleton() {
 }
 
 // ╔══════════════════════════════════════════════════════════════════════════════╗
-// ║  Responsive CSS                                                             ║
-// ╚══════════════════════════════════════════════════════════════════════════════╝
-
-const RESPONSIVE_CSS = `
-  .pillar-row-btn:active {
-    opacity: 0.85;
-    transform: scale(0.995);
-  }
-  .factor-row:hover .factor-name {
-    text-decoration: underline;
-    text-decoration-color: rgba(255,255,255,0.2);
-    text-underline-offset: 2px;
-  }
-  @media (max-width: 540px) {
-    .pillar-oneliner {
-      padding-left: 25px !important;
-      font-size: 11.5px !important;
-    }
-    .factor-hist {
-      display: none !important;
-    }
-    .factor-header-hist {
-      display: none !important;
-    }
-  }
-`;
-
-// ╔══════════════════════════════════════════════════════════════════════════════╗
 // ║  Main component                                                             ║
 // ╚══════════════════════════════════════════════════════════════════════════════╝
 
-const KEYFRAMES = `
-  @keyframes shimmer {
-    0%   { background-position: 200% 0; }
-    100% { background-position: -200% 0; }
-  }
-  @keyframes rowFadeIn {
-    from { opacity: 0; transform: translateX(-8px); }
-    to   { opacity: 1; transform: translateX(0); }
-  }
-`;
-
-export default function PillarBreakdown() {
+export default function PillarBreakdown({ onFactorClick }) {
   const [openPillar, setOpenPillar] = useState(null);
   const [loading, setLoading] = useState(true);
   const rowRefs = useRef([]);
@@ -635,124 +546,104 @@ export default function PillarBreakdown() {
   let animIdx = 0;
 
   return (
-    <div style={{
-      background: BRAND.bg, minHeight: "100vh",
-      fontFamily: BRAND.fontSans, padding: "24px 20px",
-      display: "flex", justifyContent: "center",
-    }}>
-      <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
-      <style>{KEYFRAMES}{RESPONSIVE_CSS}</style>
-
-      <div style={{ width: "100%", maxWidth: 640 }}>
-        <div style={{
-          background: BRAND.cardBg,
-          border: `1px solid ${BRAND.cardBorder}`,
-          borderRadius: 16, overflow: "hidden",
-        }}>
-          {/* Header */}
-          <div style={{
-            display: "flex", alignItems: "center", justifyContent: "space-between",
-            padding: "14px 16px 0 20px",
-          }}>
-            <span style={{
-              color: BRAND.textMuted, fontSize: 11, fontWeight: 600,
-              letterSpacing: "0.08em", textTransform: "uppercase",
-            }}>Apple Inc. MonkScore™ Breakdown</span>
-            <button
-              onClick={() => {
-                navigator.clipboard?.writeText("MonkScore™ Breakdown — Apple Inc. (AAPL) · monk.st");
-              }}
-              aria-label="Export card"
-              style={{
-                width: 28, height: 28, borderRadius: 14,
-                background: "rgba(255,255,255,0.04)",
-                border: `1px solid ${BRAND.cardBorder}`,
-                cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
-                transition: "all 0.2s ease", flexShrink: 0,
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.08)";
-                e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.background = "rgba(255,255,255,0.04)";
-                e.currentTarget.style.borderColor = BRAND.cardBorder;
-              }}
-            >
-              <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
-                <path d="M6.5 1.5V8.5M6.5 8.5L4 6M6.5 8.5L9 6" stroke={BRAND.textMuted} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
-                <path d="M2 9.5V10.5C2 11.05 2.45 11.5 3 11.5H10C10.55 11.5 11 11.05 11 10.5V9.5" stroke={BRAND.textMuted} strokeWidth="1.3" strokeLinecap="round" />
-              </svg>
-            </button>
-          </div>
-
-          {loading ? <PillarSkeleton /> : (
-            <>
-              {/* Pillar rows grouped */}
-              <div style={{ padding: "4px 8px 12px" }}>
-                {groupOrder.map(group => {
-                  const items = grouped[group];
-                  return (
-                    <div key={group} style={{
-                      background: `${GROUPS[group].color}04`,
-                      borderRadius: 10, padding: "2px 0 6px",
-                      marginBottom: 10,
-                    }}>
-                      <GroupHeader group={group} />
-                      {items.length === 0 ? (
-                        <div style={{
-                          padding: "6px 14px 10px 33px",
-                          fontSize: 11.5, color: BRAND.textMuted,
-                          fontFamily: BRAND.fontSans, fontStyle: "italic",
-                        }}>
-                          {GROUPS[group].empty}
-                        </div>
-                      ) : items.map(pillar => {
-                        const idx = animIdx++;
-                        return (
-                          <div key={pillar.key} style={{
-                            animation: `rowFadeIn 0.3s ease ${idx * 0.06}s both`,
-                          }}>
-                            <PillarRow
-                              pillar={pillar}
-                              isOpen={openPillar === pillar.key}
-                              onToggle={() => setOpenPillar(openPillar === pillar.key ? null : pillar.key)}
-                              onKeyNav={(dir) => handleKeyNav(pillar.key, dir)}
-                              allScores={allScores}
-                              // Opens FactorDetailModal — see factor-detail-modal.jsx
-                              // In production: onFactorClick={({ pillar, factor }) => setModalData({ pillar, factor })}
-                              onFactorClick={({ pillar, factor }) => {
-                                console.log("Factor clicked:", pillar, factor.name);
-                                // TODO: setModalData({ pillar, factor }) → renders <FactorDetailModal />
-                              }}
-                            />
-                          </div>
-                        );
-                      })}
-                    </div>
-                  );
-                })}
-              </div>
-            </>
-          )}
-
-          {/* Footer */}
-          {!loading && (
-            <div style={{
-              padding: "10px 20px 14px",
-              borderTop: `1px solid ${BRAND.cardBorder}`,
-              display: "flex", justifyContent: "space-between", alignItems: "center",
-            }}>
-              <span style={{ fontSize: 9, color: BRAND.textMuted, opacity: 0.5 }}>
-                {PILLARS.reduce((a, p) => a + p.factors.filter(f => !f.sub).length, 0)} factors across 5 pillars → MonkScore™ <span style={{ color: BRAND.textSecondary, fontWeight: 600, fontFamily: BRAND.fontMono }}>82</span>
-              </span>
-              <span style={{ fontSize: 9, color: BRAND.textMuted, fontFamily: BRAND.fontSans, opacity: 0.5 }}>
-                MonkStreet · monk.st
-              </span>
-            </div>
-          )}
-        </div>
+    <div style={cardStyle}>
+      {/* Header */}
+      <div style={{
+        display: "flex", alignItems: "center", justifyContent: "space-between",
+        padding: "14px 16px 0 20px",
+      }}>
+        <span style={{
+          color: BRAND.textMuted, fontSize: 11, fontWeight: 600,
+          letterSpacing: "0.08em", textTransform: "uppercase",
+        }}>Apple Inc. MonkScore™ Breakdown</span>
+        <button
+          onClick={() => {
+            navigator.clipboard?.writeText("MonkScore™ Breakdown — Apple Inc. (AAPL) · monk.st");
+          }}
+          aria-label="Export card"
+          style={{
+            width: 28, height: 28, borderRadius: 14,
+            background: "rgba(255,255,255,0.04)",
+            border: `1px solid ${BRAND.cardBorder}`,
+            cursor: "pointer", display: "flex", alignItems: "center", justifyContent: "center",
+            transition: "all 0.2s ease", flexShrink: 0,
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.08)";
+            e.currentTarget.style.borderColor = "rgba(255,255,255,0.12)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.background = "rgba(255,255,255,0.04)";
+            e.currentTarget.style.borderColor = BRAND.cardBorder;
+          }}
+        >
+          <svg width="13" height="13" viewBox="0 0 13 13" fill="none">
+            <path d="M6.5 1.5V8.5M6.5 8.5L4 6M6.5 8.5L9 6" stroke={BRAND.textMuted} strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+            <path d="M2 9.5V10.5C2 11.05 2.45 11.5 3 11.5H10C10.55 11.5 11 11.05 11 10.5V9.5" stroke={BRAND.textMuted} strokeWidth="1.3" strokeLinecap="round" />
+          </svg>
+        </button>
       </div>
+
+      {loading ? <PillarSkeleton /> : (
+        <>
+          {/* Pillar rows grouped */}
+          <div style={{ padding: "4px 8px 12px" }}>
+            {groupOrder.map(group => {
+              const items = grouped[group];
+              return (
+                <div key={group} style={{
+                  background: `${GROUPS[group].color}04`,
+                  borderRadius: 10, padding: "2px 0 6px",
+                  marginBottom: 10,
+                }}>
+                  <GroupHeader group={group} />
+                  {items.length === 0 ? (
+                    <div style={{
+                      padding: "6px 14px 10px 33px",
+                      fontSize: 11.5, color: BRAND.textMuted,
+                      fontFamily: BRAND.fontSans, fontStyle: "italic",
+                    }}>
+                      {GROUPS[group].empty}
+                    </div>
+                  ) : items.map(pillar => {
+                    const idx = animIdx++;
+                    return (
+                      <div key={pillar.key} style={{
+                        animation: `rowFadeIn 0.3s ease ${idx * 0.06}s both`,
+                      }}>
+                        <PillarRow
+                          pillar={pillar}
+                          isOpen={openPillar === pillar.key}
+                          onToggle={() => setOpenPillar(openPillar === pillar.key ? null : pillar.key)}
+                          onKeyNav={(dir) => handleKeyNav(pillar.key, dir)}
+                          allScores={allScores}
+                          onFactorClick={onFactorClick}
+                        />
+                      </div>
+                    );
+                  })}
+                </div>
+              );
+            })}
+          </div>
+        </>
+      )}
+
+      {/* Footer */}
+      {!loading && (
+        <div style={{
+          padding: "10px 20px 14px",
+          borderTop: `1px solid ${BRAND.cardBorder}`,
+          display: "flex", justifyContent: "space-between", alignItems: "center",
+        }}>
+          <span style={{ fontSize: 9, color: BRAND.textMuted, opacity: 0.5 }}>
+            {PILLARS.reduce((a, p) => a + p.factors.filter(f => !f.sub).length, 0)} factors across 5 pillars → MonkScore™ <span style={{ color: BRAND.textSecondary, fontWeight: 600, fontFamily: BRAND.fontMono }}>82</span>
+          </span>
+          <span style={{ fontSize: 9, color: BRAND.textMuted, fontFamily: BRAND.fontSans, opacity: 0.5 }}>
+            MonkStreet · monk.st
+          </span>
+        </div>
+      )}
     </div>
   );
 }
